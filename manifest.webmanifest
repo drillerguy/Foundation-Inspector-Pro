@@ -1,0 +1,9 @@
+{
+  "name": "Foundation Inspector Pro",
+  "short_name": "Foundation Pro",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#eef2f6",
+  "theme_color": "#083a73",
+  "description": "Offline foundation and caisson inspection field app"
+}
