@@ -1,13 +1,92 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#083a73"><title>Recovery & Export</title><style>:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#15202b;background:#eef2f6}*{box-sizing:border-box}body{margin:0}header{background:#083a73;color:white;padding:calc(12px + env(safe-area-inset-top)) 14px 14px}h1{margin:0;font-size:22px}.sub{font-size:13px;opacity:.88;margin-top:4px}main{max-width:760px;margin:auto;padding:14px}.card{background:white;border:1px solid #d5dde6;border-radius:14px;padding:14px;margin-bottom:12px}.card h2{margin:0 0 10px;font-size:19px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.stat{padding:12px;border-radius:12px;background:#edf3f8}.stat b{display:block;font-size:24px}.stat span{font-size:12px;color:#65717d}button,a.btn{display:block;width:100%;border:0;border-radius:11px;padding:12px;margin-top:9px;background:#0b67c2;color:#fff;text-align:center;text-decoration:none;font:inherit;font-weight:800}.secondary{background:#e7edf4!important;color:#16202a!important}.note{font-size:12px;color:#67727e;line-height:1.45}.warning{background:#fff4cc;border:1px solid #efca52;border-radius:10px;padding:10px;font-size:13px;margin-bottom:10px}input{width:100%;padding:11px;border:1px solid #c8d0d9;border-radius:10px;font:inherit}.progress{display:none;margin-top:10px;font-size:13px;font-weight:700}.list{font-size:13px;line-height:1.5;max-height:220px;overflow:auto}label{display:block;font-size:12px;color:#65717d;margin:8px 0 4px}</style></head><body><header><h1>Recovery & Export</h1><div class="sub">Foundation Inspector Pro · ORD project data on this phone</div></header><main><div class="warning"><b>Do not clear Safari website data.</b> Make the complete backup before changing or removing the app.</div><section class="card"><h2>Recovery Scan</h2><div class="grid"><div class="stat"><b id="recordCount">—</b><span>Caisson records</span></div><div class="stat"><b id="photoCount">—</b><span>Stored photos</span></div><div class="stat"><b id="linkedCount">—</b><span>Linked photos</span></div><div class="stat"><b id="missingCount">—</b><span>Missing links</span></div></div><div id="lastRecord" class="note" style="margin-top:10px">Scanning this phone…</div><button id="scan">Scan Again</button></section><section class="card"><h2>Complete Backup</h2><p class="note">Downloads one JSON backup containing all saved caisson records, photo information, and the actual photo files. Large photo collections can take several minutes.</p><button id="backup">Download Complete Backup</button><div id="backupProgress" class="progress"></div></section><section class="card"><h2>Photo PDF Report</h2><label>Report date</label><input id="reportDate" type="date"><button id="dailyPdf">Create PDF for This Date</button><button id="allPdf" class="secondary">Create PDF for All Recovered Photos</button><p class="note">The report opens with the photographs embedded. Tap <b>Print / Save PDF</b>, then use the iPhone share button to save it in Files or email it.</p><div id="pdfProgress" class="progress"></div></section><section class="card"><h2>Scan Details</h2><div id="details" class="list">No scan completed yet.</div></section><a class="btn secondary" href="./">Back to Foundation Inspector Pro</a></main><script>
-const OLD_KEY='ordCaissonRecords',NEW_KEY='foundationInspectorRecords';let records={},allPhotos=[];const $=id=>document.getElementById(id);const esc=s=>String(s??'').replace(/[&<>\"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':'&quot;'}[m]));
-function safeJSON(key){try{return JSON.parse(localStorage.getItem(key)||'{}')}catch{return {}}}function loadRecords(){records={...safeJSON(OLD_KEY),...safeJSON(NEW_KEY)}}
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#083a73"><title>Recovery & Export</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#15202b;background:#eef2f6}
+*{box-sizing:border-box}body{margin:0}header{background:#083a73;color:white;padding:calc(12px + env(safe-area-inset-top)) 14px 14px}
+h1{margin:0;font-size:22px}.sub{font-size:13px;opacity:.88;margin-top:4px}main{max-width:760px;margin:auto;padding:14px}
+.card{background:white;border:1px solid #d5dde6;border-radius:14px;padding:14px;margin-bottom:12px}.card h2{margin:0 0 10px;font-size:19px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.stat{padding:12px;border-radius:12px;background:#edf3f8}
+.stat b{display:block;font-size:24px}.stat span{font-size:12px;color:#65717d}
+button,a.btn{display:block;width:100%;border:0;border-radius:11px;padding:12px;margin-top:9px;background:#0b67c2;color:#fff;text-align:center;text-decoration:none;font:inherit;font-weight:800}
+.secondary{background:#e7edf4!important;color:#16202a!important}.note{font-size:12px;color:#67727e;line-height:1.45}
+.warning{background:#fff4cc;border:1px solid #efca52;border-radius:10px;padding:10px;font-size:13px;margin-bottom:10px}
+input{width:100%;padding:11px;border:1px solid #c8d0d9;border-radius:10px;font:inherit}.progress{display:none;margin-top:10px;font-size:13px;font-weight:700}
+.list{font-size:13px;line-height:1.5;max-height:220px;overflow:auto}label{display:block;font-size:12px;color:#65717d;margin:8px 0 4px}
+</style></head><body>
+<header><h1>Recovery & Export</h1><div class="sub">Foundation Inspector Pro · ORD project data on this phone</div></header>
+<main>
+<div class="warning"><b>Do not clear Safari website data.</b> Make a complete backup before changing or removing the app.</div>
+<section class="card"><h2>Recovery Scan</h2><div class="grid">
+<div class="stat"><b id="recordCount">—</b><span>Caisson records</span></div>
+<div class="stat"><b id="photoCount">—</b><span>Stored photos</span></div>
+<div class="stat"><b id="linkedCount">—</b><span>Linked photos</span></div>
+<div class="stat"><b id="missingCount">—</b><span>Missing links</span></div></div>
+<div id="lastRecord" class="note" style="margin-top:10px">Scanning this phone…</div><button id="scan">Scan Again</button></section>
+
+<section class="card"><h2>Complete Backup</h2>
+<p class="note">Downloads one JSON backup containing all saved caisson records and the actual photo files.</p>
+<button id="backup">Download Complete Backup</button><div id="backupProgress" class="progress"></div></section>
+
+<section class="card"><h2>Restore Backup</h2>
+<p class="note">Choose a Foundation Inspector JSON backup. Restore merges it with data already saved on this phone.</p>
+<input id="restoreFile" type="file" accept="application/json,.json">
+<button id="restore">Restore Selected Backup</button><div id="restoreProgress" class="progress"></div></section>
+
+<section class="card"><h2>Scan Details</h2><div id="details" class="list">No scan completed yet.</div></section>
+<a class="btn secondary" href="./">Back to Foundation Inspector Pro</a>
+</main>
+<script>
+const OLD_KEY='ordCaissonRecords',NEW_KEY='foundationInspectorRecords';
+let records={},allPhotos=[];
+const $=id=>document.getElementById(id);
+function safeJSON(key){try{return JSON.parse(localStorage.getItem(key)||'{}')}catch{return {}}}
+function loadRecords(){records={...safeJSON(OLD_KEY),...safeJSON(NEW_KEY)}}
 function openDB(){return new Promise((res,rej)=>{const q=indexedDB.open('ordCaissonPhotos',1);q.onupgradeneeded=()=>{if(!q.result.objectStoreNames.contains('photos'))q.result.createObjectStore('photos',{keyPath:'id'})};q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
 async function readAllPhotos(){const db=await openDB();return new Promise((res,rej)=>{const q=db.transaction('photos').objectStore('photos').getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error)})}
-async function scan(){loadRecords();$('details').textContent='Scanning…';try{allPhotos=await readAllPhotos()}catch(e){allPhotos=[]}const ids=new Set(allPhotos.map(p=>String(p.id))),linked=[];for(const [n,r] of Object.entries(records))for(const id of(r.photos||[]))linked.push({n,id:String(id)});const missing=linked.filter(x=>!ids.has(x.id));const orphan=allPhotos.filter(p=>!linked.some(x=>x.id===String(p.id)));const updated=Object.entries(records).filter(([,r])=>r.updated).sort((a,b)=>String(b[1].updated).localeCompare(String(a[1].updated)));$('recordCount').textContent=Object.keys(records).length;$('photoCount').textContent=allPhotos.length;$('linkedCount').textContent=linked.length;$('missingCount').textContent=missing.length;$('lastRecord').textContent=updated.length?`Last saved record: Caisson ${updated[0][0]} · ${new Date(updated[0][1].updated).toLocaleString()}`:'No dated records were found.';$('details').innerHTML=`<b>${orphan.length}</b> photos exist in storage but are not linked to a record.<br><b>${missing.length}</b> record photo links point to a photo that was not found.${missing.length?'<hr>'+missing.slice(0,30).map(x=>`Caisson ${esc(x.n)} — ${esc(x.id)}`).join('<br>'):''}`}
-function blobToDataURL(blob){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(blob)})}function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
-async function backup(){const out=$('backupProgress');out.style.display='block';out.textContent='Preparing records…';loadRecords();if(!allPhotos.length)allPhotos=await readAllPhotos();const photos=[];for(let i=0;i<allPhotos.length;i++){const p=allPhotos[i];out.textContent=`Adding photo ${i+1} of ${allPhotos.length}…`;photos.push({id:p.id,caisson:p.caisson,name:p.name,type:p.type,date:p.date,data:p.blob?await blobToDataURL(p.blob):null})}const payload={format:'Foundation Inspector Pro Complete Backup',version:1,created:new Date().toISOString(),origin:location.origin,records,photos};downloadBlob(new Blob([JSON.stringify(payload)],{type:'application/json'}),`Foundation-Inspector-Backup-${new Date().toISOString().slice(0,10)}.json`);out.textContent='Backup prepared. Check Safari Downloads or the Files app.'}
-function photoDate(p){return String(p.date||'').slice(0,10)}function recordForPhoto(p){const direct=p.caisson!=null?records[p.caisson]:null;if(direct)return {n:p.caisson,r:direct};for(const [n,r] of Object.entries(records))if((r.photos||[]).map(String).includes(String(p.id)))return {n,r};return {n:p.caisson??'Unassigned',r:{}}}
-async function makeReport(date){const out=$('pdfProgress');out.style.display='block';out.textContent='Collecting photographs…';loadRecords();if(!allPhotos.length)allPhotos=await readAllPhotos();let photos=date?allPhotos.filter(p=>photoDate(p)===date):allPhotos.slice();photos.sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));if(!photos.length){out.textContent='No stored photos were found for that date.';return}const entries=[];for(let i=0;i<photos.length;i++){out.textContent=`Embedding photo ${i+1} of ${photos.length}…`;const p=photos[i],x=recordForPhoto(p);entries.push({p,n:x.n,r:x.r,src:await blobToDataURL(p.blob)})}const title=date?`ORD Daily Photo Report — ${date}`:'ORD Recovered Photo Report — All Dates';const body=entries.map((x,i)=>`<section class="entry"><h2>Caisson ${esc(x.n)}</h2><div class="meta">${x.p.date?new Date(x.p.date).toLocaleString():'Date unavailable'}${x.r.lat!=null?` · GPS ${Number(x.r.lat).toFixed(6)}, ${Number(x.r.lon).toFixed(6)}`:''}</div><img src="${x.src}"><div class="caption"><b>Status:</b> ${esc(x.r.status||'Not recorded')}<br><b>Stage:</b> ${esc(x.r.condition||'Not recorded')}<br><b>Notes:</b> ${esc(x.r.notes||'No notes')}</div><div class="photoNo">Photo ${i+1} of ${entries.length}</div></section>`).join('');const w=window.open('','_blank');if(!w){out.textContent='Safari blocked the report window. Allow pop-ups and try again.';return}w.document.write(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${esc(title)}</title><style>@page{margin:.45in}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#111;margin:0}.top{border-bottom:3px solid #083a73;padding-bottom:10px;margin-bottom:18px}.top h1{margin:0;font-size:24px}.top p{margin:5px 0 0;color:#555}.print{position:sticky;top:0;width:100%;padding:13px;border:0;background:#0b67c2;color:white;font-size:17px;font-weight:800}.entry{page-break-after:always}.entry:last-child{page-break-after:auto}.entry h2{margin:10px 0 4px}.meta{font-size:12px;color:#555;margin-bottom:9px}.entry img{display:block;max-width:100%;max-height:7.2in;margin:auto;object-fit:contain}.caption{font-size:13px;line-height:1.45;border-top:1px solid #bbb;margin-top:10px;padding-top:8px}.photoNo{text-align:right;font-size:11px;color:#666;margin-top:8px}@media print{.print{display:none}.top{margin-top:0}}</style></head><body><button class="print" onclick="window.print()">Print / Save PDF</button><div class="top"><h1>${esc(title)}</h1><p>Foundation Inspector Pro · ${entries.length} embedded photographs · Created ${new Date().toLocaleString()}</p></div>${body}</body></html>`);w.document.close();out.textContent='Report opened. Tap Print / Save PDF.'}
-$('scan').onclick=scan;$('backup').onclick=()=>backup().catch(e=>$('backupProgress').textContent='Backup failed: '+e.message);$('dailyPdf').onclick=()=>makeReport($('reportDate').value).catch(e=>$('pdfProgress').textContent='PDF failed: '+e.message);$('allPdf').onclick=()=>makeReport('').catch(e=>$('pdfProgress').textContent='PDF failed: '+e.message);$('reportDate').value=new Date().toISOString().slice(0,10);scan();
+async function scan(){
+ loadRecords(); $('details').textContent='Scanning…';
+ try{allPhotos=await readAllPhotos()}catch{allPhotos=[]}
+ const ids=new Set(allPhotos.map(p=>String(p.id))),linked=[];
+ for(const[n,r]of Object.entries(records))for(const id of(r.photos||[]))linked.push({n,id:String(id)});
+ const missing=linked.filter(x=>!ids.has(x.id));
+ const orphan=allPhotos.filter(p=>!linked.some(x=>x.id===String(p.id)));
+ const updated=Object.entries(records).filter(([,r])=>r.updated).sort((a,b)=>String(b[1].updated).localeCompare(String(a[1].updated)));
+ $('recordCount').textContent=Object.keys(records).length;$('photoCount').textContent=allPhotos.length;
+ $('linkedCount').textContent=linked.length;$('missingCount').textContent=missing.length;
+ $('lastRecord').textContent=updated.length?`Last saved record: Caisson ${updated[0][0]} · ${new Date(updated[0][1].updated).toLocaleString()}`:'No dated records were found.';
+ $('details').innerHTML=`<b>${orphan.length}</b> photos exist in storage but are not linked.<br><b>${missing.length}</b> photo links are missing.`;
+}
+function blobToDataURL(blob){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(blob)})}
+function dataURLToBlob(data){const parts=String(data).split(','),mime=(parts[0].match(/data:(.*?);/)||[])[1]||'image/jpeg',bin=atob(parts[1]||''),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return new Blob([bytes],{type:mime})}
+function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
+async function backup(){
+ const out=$('backupProgress');out.style.display='block';out.textContent='Preparing records…';loadRecords();allPhotos=await readAllPhotos();
+ const photos=[];
+ for(let i=0;i<allPhotos.length;i++){const p=allPhotos[i];out.textContent=`Adding photo ${i+1} of ${allPhotos.length}…`;photos.push({id:p.id,caisson:p.caisson,name:p.name,type:p.type,date:p.date,data:p.blob?await blobToDataURL(p.blob):null})}
+ const payload={format:'Foundation Inspector Pro Complete Backup',version:1,created:new Date().toISOString(),origin:location.origin,records,photos};
+ downloadBlob(new Blob([JSON.stringify(payload)],{type:'application/json'}),`Foundation-Inspector-Backup-${new Date().toISOString().slice(0,10)}.json`);
+ out.textContent='Backup prepared. Check Safari Downloads or Files.';
+}
+async function restore(){
+ const out=$('restoreProgress'),file=$('restoreFile').files[0];out.style.display='block';
+ if(!file){out.textContent='Choose a JSON backup file first.';return}
+ out.textContent='Reading backup…';
+ let payload;try{payload=JSON.parse(await file.text())}catch{throw Error('That file is not valid JSON.')}
+ if(!payload||!payload.records||!Array.isArray(payload.photos))throw Error('This is not a Foundation Inspector complete backup.');
+ const current={...safeJSON(OLD_KEY),...safeJSON(NEW_KEY)},merged={...current,...payload.records};
+ localStorage.setItem(NEW_KEY,JSON.stringify(merged));
+ const db=await openDB();
+ await new Promise((res,rej)=>{const tx=db.transaction('photos','readwrite'),store=tx.objectStore('photos');
+  payload.photos.forEach((p,i)=>{out.textContent=`Restoring photo ${i+1} of ${payload.photos.length}…`;if(p&&p.id&&p.data)store.put({id:p.id,caisson:p.caisson,name:p.name||'Recovered photo',type:p.type||'image/jpeg',date:p.date||'',blob:dataURLToBlob(p.data)})});
+  tx.oncomplete=res;tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error)
+ });
+ out.textContent=`Restore complete: ${Object.keys(payload.records).length} records and ${payload.photos.length} photos processed.`;
+ await scan();
+}
+$('scan').onclick=scan;
+$('backup').onclick=()=>backup().catch(e=>{$('backupProgress').style.display='block';$('backupProgress').textContent='Backup failed: '+e.message});
+$('restore').onclick=()=>restore().catch(e=>{$('restoreProgress').style.display='block';$('restoreProgress').textContent='Restore failed: '+e.message});
+scan();
 </script></body></html>
